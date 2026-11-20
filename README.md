@@ -32,36 +32,6 @@ All values below are from the five-seed runs on the official test partition. The
 
 The binary improvement trades a lower false-alarm rate for a higher miss rate (3.12% for the proposed detector versus 1.49% for RF). In the ten-class task, performance does not improve for every class; see the per-class results, especially the Shellcode F1 change, before making class-specific claims. UNSW-NB15 is general network traffic and should not be described as an IoT-only dataset.
 
-## Repository layout
-
-```text
-.
-├── Dataset/                         # Official train/test CSVs (obtain separately)
-├── figs/                             # Generated PNG/PDF figures
-├── paper/                            # Paper source, compiled PDF, and paper figures
-├── results/                          # Recorded JSON, CSV, text summaries, and logs
-├── src/
-│   ├── baseline.py                   # Seven binary baseline models
-│   ├── svm_sub.py                    # 40,000-row RBF-SVM and ordinal-NB sensitivity run
-│   ├── extended.py                   # Binary extension, grouped CV, and original multiclass RF reference
-│   ├── patch_rf.py                   # Recompute RF metrics with the documented default decision rule
-│   ├── multiclass_smote.py           # Ten-class SMOTENC extension
-│   ├── explore.py                    # Exploratory model/feature sensitivity scenarios
-│   ├── explore2.py                   # Exploratory threshold and validation scenarios
-│   ├── explore3.py                   # Exploratory partition-shift and weighting diagnostics
-│   ├── fp_analysis.py                # False-alarm breakdown by protocol/state
-│   ├── timing.py                     # Fit time, inference latency, and serialized model size
-│   ├── figs.py                       # Export paper ROC and per-category figures
-│   ├── summarize.py                  # Print consolidated result tables
-│   └── common.py                     # Shared data loading, metrics, and JSON output helpers
-├── reproduce_unsw_nb15_code.ipynb    # Original cited-paper reproduction notebook
-├── UNSW_NB15_Reproduction_and_Extension_Colab.ipynb
-├── requirements-multiclass.txt
-└── LICENSE
-```
-
-`results/` contains the recorded project outputs used to prepare the paper. They are reference artifacts, not output from a fresh run on your machine. `src/explore*.py` are exploratory analyses; do not select a model or threshold based on their test-set metrics.
-
 ## Dataset
 
 Download the official partition files from the [UNSW-NB15 dataset page](https://research.unsw.edu.au/projects/unsw-nb15-dataset) and place them here:
