@@ -13,9 +13,7 @@ The project also includes data-quality and distribution-shift audits, per-catego
 
 **Authors:** Muhammad Shariq, Saud Nasir, and Rohma Shaikh
 
-- Paper source: [`paper/paper.tex`](paper/paper.tex)
 - Compiled paper: [`Improving_UNSW_NB15_Network_Intrusion_Detection_Through_Cost_Sensitive_Gradient_Boosting_and_Threshold_Calibration.pdf`](Improving_UNSW_NB15_Network_Intrusion_Detection_Through_Cost_Sensitive_Gradient_Boosting_and_Threshold_Calibration.pdf)
-- Figures: [`paper/roc.pdf`](paper/roc.pdf), [`paper/percat.pdf`](paper/percat.pdf)
 
 The binary and ten-class experiments use different targets and must be reported as separate tasks. The binary target is `label` (normal vs. attack); the multiclass target is `attack_cat` (ten categories).
 
@@ -60,72 +58,18 @@ python -m pip install numpy pandas scipy matplotlib scikit-learn==1.9.1 lightgbm
 
 On macOS/Linux, activate with `source .venv/bin/activate` after creating the virtual environment. The repository also provides [`requirements-multiclass.txt`](requirements-multiclass.txt) for the multiclass dependencies, but the command above installs the full set used by the scripts and plots.
 
-## Reproduce the paper results
 
-Run the scripts from the `src/` directory. This is important because a few analysis scripts read or write files using paths relative to that working directory.
-
-From the repository root in PowerShell:
-
-```powershell
-Set-Location src
-
-# Reproduce six non-SVM binary baselines.
-python baseline.py KNN "Naive Bayes" DT "Logistic Regression" AdaBoost "Random Forest"
-
-# Run the stratified 40,000-row RBF-SVM and Naive Bayes encoding sensitivity.
-python svm_sub.py
-
-# Run grouped-CV binary extension, ablations, and the five-seed multiclass RF reference.
-python extended.py
-
-# Align the saved RF default-threshold results with predict() tie handling.
-python patch_rf.py
-
-# Run ten-class LightGBM + SMOTENC. This uses the RF reference from extended.json.
-python multiclass_smote.py
-
-# Supplementary results and paper figures.
-python timing.py
-python fp_analysis.py
-python figs.py
-python summarize.py
-```
 
 The baseline script supports selecting individual models by name. Running it without arguments runs every model, including the full-data RBF-SVM, which can take substantially longer than the stratified 40,000-row SVM used for the paper comparison. The `extended.py` and SMOTENC runs are compute-intensive; allow time for grouped cross-validation and repeated fits. The test partition is for final reporting, not model or threshold selection. The multiclass sampler is fitted only inside training folds and on the full training partition for final fits; it never resamples the test rows.
 
 The scripts write JSON/CSV/text outputs under `results/` and figures under `figs/`. To rerun the full workflow cleanly, archive any existing outputs first; scripts may overwrite files with the same names.
 
-## Google Colab notebooks
+## Google Colab workflow
 
-The repository contains two notebooks for different stages of the work. They are alternatives; choose the one matching the experiment you want to run.
+Open [`UNSW_NB15_Reproduction_and_Extension_Colab.ipynb`](UNSW_NB15_Reproduction_and_Extension_Colab.ipynb) in Google Colab. The notebook expects the two official CSVs in `MyDrive/UNSW_NB15/Dataset/`; Google Drive is mounted to read those inputs. Generated results are kept in the temporary Colab runtime folder `/content/UNSW_NB15_colab_results/`, not written to Drive. The final notebook section packages those results into a ZIP download. Download it before the Colab runtime ends because local runtime files are temporary.
 
-### Original paper reproduction
+The notebook includes optional switches for long sections, including binary baselines, the compact-feature/runtime experiment, and shift/scenario diagnostics. Read the section notes before running all cells; the main grouped-CV and SMOTENC workflows can take a long time.
 
-Open [`reproduce_unsw_nb15_code.ipynb`](reproduce_unsw_nb15_code.ipynb) in Colab and run the cells in order. This notebook follows the original paper's binary-classification workflow: data cleaning and preprocessing, seven classifiers, comparison with the paper's Table 1, metric-consistency checks, plots, and execution-time measurements.
-
-By default, `DATA_SOURCE = "upload"` and `USE_DRIVE = False`. Upload the official training and testing CSVs when prompted. Results are stored in the notebook's local `results/` folder, then packaged as `paper_method_results.zip` and downloaded to your computer. The default settings do not save results to Drive.
-
-### Final enhanced reproduction and extension
-
-Open [`UNSW_NB15_Reproduction_and_Extension_Colab.ipynb`](UNSW_NB15_Reproduction_and_Extension_Colab.ipynb) in Colab to run the final enhanced workflow. It covers the binary baselines and cost-sensitive GBDT extension, grouped-CV threshold calibration, statistical/per-category diagnostics, compact-feature and runtime analysis, ten-class SMOTENC, and optional data-shift and false-alarm scenarios.
-
-This notebook reads the official CSVs from `MyDrive/UNSW_NB15/Dataset/`; Drive is mounted for input access only. Generated results remain in the temporary runtime folder `/content/UNSW_NB15_colab_results/`, not on Drive. The final notebook section packages those outputs into a ZIP download. Download it before the runtime ends because Colab's local files are temporary.
-
-The enhanced notebook includes optional switches for long sections, including binary baselines, the compact-feature/runtime experiment, and shift/scenario diagnostics. Read the section notes before running all cells; the main grouped-CV and SMOTENC workflows can take a long time.
-
-## Results and artifacts
-
-- `results/baseline_KNN_NaiveBayes_DT_LogisticRegression_AdaBoost_RandomForest.json`, `results/baseline_svm.json`: binary baseline metrics.
-- `results/extended.json`: binary extension, grouped-CV hyperparameter/threshold results, significance, per-category metrics, compact variants, and binary RF reference runs.
-- `results/multiclass_smote.json`: ten-class RF and SMOTENC run details.
-- `results/multiclass_smote_test_per_class.csv`: per-class scores by model and seed.
-- `results/multiclass_smote_summary.txt`: human-readable multiclass summary.
-- `results/fp_analysis.json`: false-alarm group diagnostics.
-- `results/timing.json`: fitting time, inference time per flow, and serialized model size.
-- `results/summary.txt`: consolidated baseline and extension tables.
-- `figs/roc.pdf` / `figs/roc.png`, `figs/percat.pdf` / `figs/percat.png`: paper figures.
-
-Numbers in the paper are rounded summaries of saved results. A fresh run may differ slightly due to software and hardware. Report the actual seeds, package versions, and completed runs when publishing a rerun.
 
 ## Citation
 
